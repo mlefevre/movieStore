@@ -61,16 +61,10 @@ public class Cycle {
 	 * @param productionOrder the production rank.
 	 */
 	public void addMovie(Movie movie, int storyOrder, int productionOrder){
-		String movieId = getNewMovieId(movie); 
+		String movieId = getMovieId(movie); 
 		elements.put(movieId, movie);
-		if(storyOrder >= storyTellingChronology.size()){
-			storyOrder = storyTellingChronology.size();
-		}
-		storyTellingChronology.add(storyOrder, movieId);
-		if(productionOrder >= productionChronology.size()){
-			productionOrder = productionChronology.size();
-		}
-		productionChronology.add(productionOrder,movieId);
+		setStoryOrder(storyOrder, movieId);
+		setProductionOrder(productionOrder, movieId);
 	}
 	
 	/**
@@ -78,11 +72,33 @@ public class Cycle {
 	 * @param movie The movie to remove.
 	 */
 	public void removeMovie(Movie movie){
+		String movieKey = getMovieId(movie);
 		
+		elements.remove(movieKey);
+		storyTellingChronology.remove(movieKey);
+		productionChronology.remove(movieKey);
 	}
 	
-	public void changeMovieOrder(){
-		// TODO
+	/**
+	 * Set a new value for the production or story order
+	 * of a movie contained in the cycle.
+	 * <p>
+	 * If the movie doesn't exist in the cycle, nothing happens.
+	 * <p>
+	 * If the given order is too big, the movie is put at the end.
+	 * @param movie The movie to move
+	 * @param storyOrder the new rank of story order
+	 * @param prodOrder the new rank of production order.
+	 */
+	public void changeMovieOrder(Movie movie, int storyOrder, int prodOrder){
+		
+		if(elements.containsValue(movie)){
+			String movieKey = getMovieId(movie);
+			storyTellingChronology.remove(movieKey);
+			setStoryOrder(storyOrder, movieKey);
+			productionChronology.remove(movieKey);
+			setProductionOrder(prodOrder, movieKey);
+		}
 	}
 	
 	public String getName() {
@@ -105,33 +121,34 @@ public class Cycle {
 	}
 
 	/**
-	 * Get a new movie id based on the original movie title.
-	 * <p>
-	 * If the movie title is "A new movie splendid title", the id will be :
-	 * <ul>
-	 * <li><i>anewmovi</i></li>
-	 * <li><i>anewmovi1</i> if the previous id already exists in this cycle</li>
-	 * <li><i>anewmovi2</i> if both previous ids already exist.</li>
-	 * </ul>
+	 * Get a new movie id based on the {@link Movie#hashCode}
 	 * @param movie
 	 * @return
 	 */
-	private String getNewMovieId(Movie movie){
-		String movieTitle = movie.getTitle().getOriginal();
-		String movieId = movieTitle.trim().toLowerCase();
-		if(movieId.length()>KEY_SIZE){
-			movieId = movieId.substring(0, KEY_SIZE);
-		}
-		return checkMovieId(movieId,0);
+	private String	getMovieId(Movie movie){
+		return String.valueOf(movie.hashCode());
 	}
 	
-	private String checkMovieId(String movieId, int recCount){
-		recCount++;
-		if(elements.keySet().contains(movieId)){
-			String idToCheck = movieId.substring(0,KEY_SIZE)
-					.concat(String.valueOf(recCount));
-			movieId = checkMovieId(idToCheck, recCount);
+	/**
+	 * @param productionOrder
+	 * @param movieId
+	 */
+	private void setProductionOrder(int productionOrder, String movieId) {
+		if(productionOrder >= productionChronology.size()){
+			productionOrder = productionChronology.size();
 		}
-		return movieId;
+		productionChronology.add(productionOrder,movieId);
 	}
+	
+	/**
+	 * @param storyOrder
+	 * @param movieId
+	 */
+	private void setStoryOrder(int storyOrder, String movieId) {
+		if(storyOrder >= storyTellingChronology.size()){
+			storyOrder = storyTellingChronology.size();
+		}
+		storyTellingChronology.add(storyOrder, movieId);
+	}
+	
 }

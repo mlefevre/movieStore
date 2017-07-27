@@ -3,8 +3,7 @@
  */
 package be.mlefevre.MovieStore.model;
 
-import static org.junit.Assert.*;
-import junit.framework.Assert;
+import org.junit.Assert;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -72,10 +71,10 @@ public class CycleTest {
 		default_movie_1.setGenre(Genre.COMEDY);
 		default_movie_2 = new Movie();
 		default_movie_2.setTitle(movieDefaultTitle2);
-		default_movie_1.setGenre(Genre.WAR);
+		default_movie_2.setGenre(Genre.WAR);
 		default_movie_3 = new Movie();
 		default_movie_3.setTitle(movieDefaultTitle3);
-		default_movie_1.setGenre(Genre.COMEDY);
+		default_movie_3.setGenre(Genre.COMEDY);
 
 		cycleToTest.addMovie(default_movie_1, 0, 0);
 		cycleToTest.addMovie(default_movie_2, 1, 1);
@@ -323,11 +322,118 @@ public class CycleTest {
 		key = cycleToTest.getProductionChronology().get(0);		
 		Assert.assertEquals(DEFAULT_ORIGINAL_TITLE, cycleToTest.getElements().get(key).getTitle().getOriginal());
 	}
-	
+
+	/*
+	 * Test the removeMovie method.
+	 * remove the movie 'default_movie_2'
+	 * <p>
+	 * Storytelling and production order should then be :
+	 * <ul>
+	 * <li>default1</li>
+	 * <li>default3</li>
+	 * </ul>
+	 */
 	@Test
 	public void testRemoveMovie(){
 		cycleToTest.removeMovie(default_movie_2);
 		
 		Assert.assertEquals(2, cycleToTest.getElements().size());
+		Assert.assertEquals(2, cycleToTest.getStoryTellingChronology().size());
+		Assert.assertEquals(2, cycleToTest.getProductionChronology().size());
+		
+		Assert.assertFalse(cycleToTest.getElements().containsValue(default_movie_2));
+		Assert.assertTrue(cycleToTest.getElements().containsValue(default_movie_3));
+		Assert.assertTrue(cycleToTest.getElements().containsValue(default_movie_1));
+		Assert.assertEquals(String.valueOf(default_movie_1.hashCode()), cycleToTest.getStoryTellingChronology().get(0));
+		Assert.assertEquals(String.valueOf(default_movie_3.hashCode()), cycleToTest.getStoryTellingChronology().get(1));
+	}
+	
+	/*
+	 * test the removeMovie method.
+	 * The movie to remove does not exist in the cycle.
+	 * Nothing happens.
+	 */
+	@Test
+	public void testRemoveMovieNotExist(){
+		cycleToTest.removeMovie(movie1);
+		
+		Assert.assertEquals(3, cycleToTest.getElements().size());
+		Assert.assertEquals(3, cycleToTest.getStoryTellingChronology().size());
+		Assert.assertEquals(3, cycleToTest.getProductionChronology().size());
+	}
+
+	/*
+	 * Test the changeMovieOrder method. 
+	 * <p>
+	 * Storytelling and production order should become :
+	 * <ul>
+	 * <li>default1</li>
+	 * <li>default3</li>
+	 * <li>default2</li>
+	 * </ul>
+	 */
+	@Test
+	public void testChangeMovieOrder(){
+		cycleToTest.changeMovieOrder(default_movie_3, 1, 1);
+		
+		Assert.assertEquals(3, cycleToTest.getElements().size());
+		Assert.assertTrue(cycleToTest.getElements().containsValue(default_movie_3));
+		
+		Assert.assertEquals(3, cycleToTest.getStoryTellingChronology().size());
+		Assert.assertEquals(0, cycleToTest.getStoryTellingChronology().indexOf(String.valueOf(default_movie_1.hashCode())));
+		Assert.assertEquals(1, cycleToTest.getStoryTellingChronology().indexOf(String.valueOf(default_movie_3.hashCode())));
+		Assert.assertEquals(2, cycleToTest.getStoryTellingChronology().indexOf(String.valueOf(default_movie_2.hashCode())));
+
+		Assert.assertEquals(0, cycleToTest.getProductionChronology().indexOf(String.valueOf(default_movie_1.hashCode())));
+		Assert.assertEquals(1, cycleToTest.getProductionChronology().indexOf(String.valueOf(default_movie_3.hashCode())));
+		Assert.assertEquals(2, cycleToTest.getProductionChronology().indexOf(String.valueOf(default_movie_2.hashCode())));
+	}
+	
+	/*
+	 * Test the changeMovieOrder method. 
+	 * <p>
+	 * Storytelling and production order should become :
+	 * <ul>
+	 * <li>default2</li>
+	 * <li>default3</li>
+	 * <li>default1</li>
+	 * </ul>
+	 */
+	@Test
+	public void testChangeMovieOrderNewValueTooBig(){
+		cycleToTest.changeMovieOrder(default_movie_1, 5, 5);
+		
+		Assert.assertEquals(3, cycleToTest.getElements().size());
+		Assert.assertTrue(cycleToTest.getElements().containsValue(default_movie_1));
+		
+		Assert.assertEquals(3, cycleToTest.getStoryTellingChronology().size());
+		Assert.assertEquals(0, cycleToTest.getStoryTellingChronology().indexOf(String.valueOf(default_movie_2.hashCode())));
+		Assert.assertEquals(1, cycleToTest.getStoryTellingChronology().indexOf(String.valueOf(default_movie_3.hashCode())));
+		Assert.assertEquals(2, cycleToTest.getStoryTellingChronology().indexOf(String.valueOf(default_movie_1.hashCode())));
+
+		Assert.assertEquals(0, cycleToTest.getProductionChronology().indexOf(String.valueOf(default_movie_2.hashCode())));
+		Assert.assertEquals(1, cycleToTest.getProductionChronology().indexOf(String.valueOf(default_movie_3.hashCode())));
+		Assert.assertEquals(2, cycleToTest.getProductionChronology().indexOf(String.valueOf(default_movie_1.hashCode())));
+	}
+	
+	/*
+	 * Test the changeMovieOrder method.
+	 * The given movie doesn't exist so nothing change.
+	 */
+	@Test
+	public void testChangeMovieOrderNotExist(){
+		cycleToTest.changeMovieOrder(movie1, 1, 1);
+
+		Assert.assertEquals(3, cycleToTest.getElements().size());
+		Assert.assertFalse(cycleToTest.getElements().containsValue(movie1));
+		
+		Assert.assertEquals(3, cycleToTest.getStoryTellingChronology().size());
+		Assert.assertEquals(0, cycleToTest.getStoryTellingChronology().indexOf(String.valueOf(default_movie_1.hashCode())));
+		Assert.assertEquals(1, cycleToTest.getStoryTellingChronology().indexOf(String.valueOf(default_movie_2.hashCode())));
+		Assert.assertEquals(2, cycleToTest.getStoryTellingChronology().indexOf(String.valueOf(default_movie_3.hashCode())));
+
+		Assert.assertEquals(0, cycleToTest.getProductionChronology().indexOf(String.valueOf(default_movie_1.hashCode())));
+		Assert.assertEquals(1, cycleToTest.getProductionChronology().indexOf(String.valueOf(default_movie_2.hashCode())));
+		Assert.assertEquals(2, cycleToTest.getProductionChronology().indexOf(String.valueOf(default_movie_3.hashCode())));
 	}
 }

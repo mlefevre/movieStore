@@ -20,7 +20,7 @@ public class Movie {
 	private int length;
 	private Title title;
 	private Genre genre;
-//	private Date production ; // TODO
+	private int productionYear ;
 	
 	public Person getDirector() {
 		return director;
@@ -58,6 +58,23 @@ public class Movie {
 	public void setGenre(Genre genre) {
 		this.genre = genre;
 	}
+	public int getProductionYear() {
+		return productionYear;
+	}
+	public void setProductionYear(int productionYear) {
+		this.productionYear = productionYear;
+	}
+	
+	/**
+	 * hashCode based on 
+	 * <ul>
+	 * <li>director</li>
+	 * <li>length</li>
+	 * <li>origin</li>
+	 * <li>production year</li>
+	 * <li>title</li>
+	 * </ul>
+	 */
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -66,32 +83,45 @@ public class Movie {
 				+ ((director == null) ? 0 : director.hashCode());
 		result = prime * result + length;
 		result = prime * result + ((origin == null) ? 0 : origin.hashCode());
+		result = prime * result + productionYear;
 		result = prime * result + ((title == null) ? 0 : title.hashCode());
 		return result;
 	}
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (obj == null) {
 			return false;
-		if (getClass() != obj.getClass())
+		}
+		if (getClass() != obj.getClass()) {
 			return false;
+		}
 		Movie other = (Movie) obj;
 		if (director == null) {
-			if (other.director != null)
+			if (other.director != null) {
 				return false;
-		} else if (!director.equals(other.director))
+			}
+		} else if (!director.equals(other.director)) {
 			return false;
-		if (length != other.length)
+		}
+		if (length != other.length) {
 			return false;
-		if (origin != other.origin)
+		}
+		if (origin != other.origin) {
 			return false;
+		}
+		if (productionYear != other.productionYear) {
+			return false;
+		}
 		if (title == null) {
-			if (other.title != null)
+			if (other.title != null) {
 				return false;
-		} else if (!title.equals(other.title))
+			}
+		} else if (!title.equals(other.title)) {
 			return false;
+		}
 		return true;
 	}
 	
