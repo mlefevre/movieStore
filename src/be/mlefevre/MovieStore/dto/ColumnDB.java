@@ -6,8 +6,6 @@ package be.mlefevre.MovieStore.dto;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.postgresql.jdbc2.ArrayAssistantRegistry;
-
 /**
  * Defines a column in a DB.
  * @author lefevre

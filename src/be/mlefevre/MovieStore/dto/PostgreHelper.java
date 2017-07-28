@@ -5,10 +5,10 @@ package be.mlefevre.MovieStore.dto;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
-import java.util.List;
 
 /**
  * This class provide method to access and manipulate data in 
@@ -94,8 +94,39 @@ public class PostgreHelper {
 		valueBuilder.append(")");
 		String sql = "INSERT INTO " +tableName+" "+ columnBuilder.toString()+" "
 	            + "VALUES "+valueBuilder.toString()+";";
-		statement.executeUpdate(sql);
 
+		statement.executeUpdate(sql);
+	}
+	
+	public ResultSet selectRow(String tableName, String condition)throws SQLException{
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT * FROM ").append(tableName);
+		if(condition != null && ! condition.trim().equals("")){
+			sql.append(" WHERE ").append(condition);
+		}
+		sql.append(";");
+        return statement.executeQuery( sql.toString());
+	}
+	
+	public void updateRow(String tableName, HashMap<String, String> newValues, String conditions)throws SQLException{
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE ").append(tableName).append(" set ");
+		int index = 1;
+		for(String key : newValues.keySet()){
+			String hasComma = (index<newValues.size())?",":"";
+			sql.append(key).append(" = ").append(newValues.get(key)).append(hasComma);
+			index++;
+		}
+		sql.append(" where ").append(conditions);
+		
+        statement.executeUpdate(sql.toString());
+	}
+	
+	public void deleteRow(String tableName, String conditions)throws SQLException{
+		StringBuilder sqlBuilder = new StringBuilder();
+		sqlBuilder.append("DELETE from ").append(tableName).append(" WHERE ").append(conditions);
+		
+        statement.executeUpdate(sqlBuilder.toString());
 	}
 
 }

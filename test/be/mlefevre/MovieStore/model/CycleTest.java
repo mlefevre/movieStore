@@ -10,8 +10,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
+ * Test class to validate {@link Cycle} class.
  * @author lefevre
- *
  */
 public class CycleTest {
 
