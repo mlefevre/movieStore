@@ -56,6 +56,24 @@ public class Person {
 	}
 
 	@Override
+	public String toString() {
+		StringBuilder builder = new StringBuilder();
+		builder.append("Person [");
+		if (name != null)
+			builder.append("name=").append(name).append(", ");
+		if (firstName != null)
+			builder.append("firstName=").append(firstName).append(", ");
+		if (dateOfBirth != null)
+			builder.append("dateOfBirth=").append(dateOfBirth).append(", ");
+		if (origin != null)
+			builder.append("origin=").append(origin).append(", ");
+		if (alternativeNames != null)
+			builder.append("alternativeNames=").append(alternativeNames);
+		builder.append("]");
+		return builder.toString();
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;

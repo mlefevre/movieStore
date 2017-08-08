@@ -1,7 +1,7 @@
 /**
  * 
  */
-package be.mlefevre.MovieStore.dto;
+package be.mlefevre.MovieStore.dao;
 
 import java.util.ArrayList;
 import java.util.List;

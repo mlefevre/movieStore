@@ -1,11 +1,19 @@
 /**
  * 
  */
-package be.mlefevre.MovieStore.dto;
+package be.mlefevre.MovieStore.dao;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
+
+import be.mlefevre.MovieStore.model.Country;
+import be.mlefevre.MovieStore.model.Person;
 
 /**
  * classe de test et mise en pratique des accès db.
@@ -21,7 +29,7 @@ public class PostgreSQLJDBC {
 	private static final String COLUMN2 = "Name2";
 	private static final String COLUMN1 = "Name1";
 	private static final String TABLE_NAME = "TEST_MLE";
-
+	
 	/**
 	 * @param args
 	 */
@@ -36,20 +44,54 @@ public class PostgreSQLJDBC {
 	      ColumnDB column5 = new ColumnDB(COLUMN5,"boolean");
 
 	      HashMap<String, String> row1 = new HashMap<String, String>();
-	      row1.put(COLUMN1, "1");
-	      row1.put(COLUMN2, "1239");
+	      row1.put(COLUMN1, "'1'");
+	      row1.put(COLUMN2, "'1239'");
 	      row1.put(COLUMN3, "'abcde'");
 	      row1.put(COLUMN4, "'Une String'");
 	      row1.put(COLUMN5, "false");
 	      HashMap<String, String> row2 = new HashMap<String, String>();
-	      row2.put(COLUMN1, "2");
-	      row2.put(COLUMN2, "0");
+	      row2.put(COLUMN1, "'2'");
+	      row2.put(COLUMN2, "'0'");
 	      row2.put(COLUMN3, "'fghij'");
 	      row2.put(COLUMN4, "'Une longue string'");
 	      row2.put(COLUMN5, "true");
+
+	      Person sk = new Person();
+	      sk.setName("Kubrick");
+	      sk.setFirstName("Stanliii");
+	      Calendar calendar= new GregorianCalendar(1928,Calendar.JULY,26);
+	      sk.setDateOfBirth(calendar.getTime());
+	      sk.setOrigin(Country.USA);
+	      
+	      Person kl = new Person();
+	      kl.setName("Loach");
+	      kl.setFirstName("Ken");
+	      calendar.set(1936, Calendar.JUNE, 17);
+	      kl.setDateOfBirth(calendar.getTime());
+	      kl.setOrigin(Country.UK);
 	      
 	      try {
 	         PostgreHelper psqlHelper = new PostgreHelper();
+	         
+	         PersonDAO dao = new PersonDAO(psqlHelper);
+	         dao.create();
+	         dao.save(sk);
+	         
+	         for(Person p : dao.getPersonFromName("Kubrick")){
+	        	 System.out.println(p);
+	         }
+	         
+	         sk.setFirstName("Stanley");
+	         dao.save(sk);
+	         dao.save(kl);
+	         
+	         for(Person p : dao.getPersonFromName("Loach")){
+	        	 System.out.println(p);
+	         }
+	         System.out.println("Press enter to end the program and drop the created table.");	         
+	         System.in.read();
+	         dao.destroy();
+	       /*  
 	         psqlHelper.createTable(TABLE_NAME,column1, column2, column3,column4, column5);
 
 	         psqlHelper.insertRow(TABLE_NAME, row1);
@@ -76,7 +118,7 @@ public class PostgreSQLJDBC {
 	         System.out.println("Press enter to end the program and drop the created table.");	         
 	         System.in.read();
 	         psqlHelper.dropTable(TABLE_NAME);
-	         
+	         */
 	         psqlHelper.destroy();
 	      } catch (Exception e) {
 	         e.printStackTrace();

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package be.mlefevre.MovieStore.dto;
+package be.mlefevre.MovieStore.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -16,7 +16,7 @@ import java.util.HashMap;
  * @author lefevre
  *
  */
-public class PostgreHelper {
+public class PostgreHelper implements SQLHelper {
 	
 	private final String DB_NAME = "lefevre";
 	private final String DB_URL = "jdbc:postgresql://localhost:5432/";
@@ -53,23 +53,35 @@ public class PostgreHelper {
 		connection.close();
 	}
 
+	/**
+	 * Create a table with the given name and columns defined.<p>
+	 * Check if a table with the same name already exist. If so, no new table is created.
+	 * @param tableName
+	 * @param columns
+	 * @throws SQLException
+	 */
 	public void createTable(String tableName, ColumnDB... columns) throws SQLException{
-		String sql = "CREATE TABLE " +tableName;
-		int index = 1;
-		for(ColumnDB column : columns){
-			if(index==1){
-				sql += " (";
+		if (isTableExist(tableName)){
+			//doNothing
+			System.out.println("Table "+tableName+" already exists.");
+		}else{
+			String sql = "CREATE TABLE " +tableName;
+			int index = 1;
+			for(ColumnDB column : columns){
+				if(index==1){
+					sql += " (";
+				}
+				sql += column.toString();
+				if(index < columns.length){
+					sql += ", ";
+				}else{
+					sql += ")";
+				}
+				index++;
 			}
-			sql += column.toString();
-			if(index < columns.length){
-				sql += ", ";
-			}else{
-				sql += ")";
-			}
-			index++;
+			statement.executeUpdate(sql);
+			System.out.println("Table "+tableName+" created.");
 		}
-		statement.executeUpdate(sql);
-		System.out.println("Table "+tableName+" created.");
 	}
 	
 	public void dropTable(String tableName) throws SQLException{
@@ -127,6 +139,17 @@ public class PostgreHelper {
 		sqlBuilder.append("DELETE from ").append(tableName).append(" WHERE ").append(conditions);
 		
         statement.executeUpdate(sqlBuilder.toString());
+	}
+	
+	private boolean isTableExist(String tableName) throws SQLException{
+		tableName = tableName.toLowerCase();
+		StringBuilder sql = new StringBuilder();
+		sql.append("SELECT EXISTS ( ")
+			.append("SELECT 1 FROM pg_tables WHERE  tablename = '")
+			.append(tableName).append("');");
+		ResultSet result = statement.executeQuery( sql.toString());
+		result.next();
+		return result.getBoolean(1);
 	}
 
 }
