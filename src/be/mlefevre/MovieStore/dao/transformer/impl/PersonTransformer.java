@@ -40,12 +40,12 @@ public class PersonTransformer implements Transformer<Person> {
 	public HashMap<String, String> getValuesMap(Person entity) {
 		
 		HashMap<String, String> row = new HashMap<String, String>();
-		row.put(NAME_COL_NAME, "'" + entity.getName() + "'");
-		row.put(FIRSTNAME_COL_NAME, "'" + entity.getFirstName() + "'");
+		row.put(NAME_COL_NAME, entity.getName());
+		row.put(FIRSTNAME_COL_NAME, entity.getFirstName());
 	      DateFormat dFormat = new SimpleDateFormat(DATE_FORMAT);
 	      
-		row.put(DOB_COL_NAME, "'" + dFormat.format(entity.getDateOfBirth()) + "'");
-		row.put(ORIGIN_COL_NAME, "'" + entity.getOrigin().getName() + "'" );
+		row.put(DOB_COL_NAME, dFormat.format(entity.getDateOfBirth()));
+		row.put(ORIGIN_COL_NAME, entity.getOrigin().getName());
 		return row;
 	}
 

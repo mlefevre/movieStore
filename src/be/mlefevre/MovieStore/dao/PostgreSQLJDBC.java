@@ -3,17 +3,20 @@
  */
 package be.mlefevre.MovieStore.dao;
 
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 
+import be.mlefevre.MovieStore.dao.Condition.Combination;
+import be.mlefevre.MovieStore.dao.Condition.Type;
+import be.mlefevre.MovieStore.dao.impl.PersonDAO;
+import be.mlefevre.MovieStore.dao.impl.TitleDAO;
 import be.mlefevre.MovieStore.model.Country;
 import be.mlefevre.MovieStore.model.Person;
+import be.mlefevre.MovieStore.model.Title;
 
 /**
  * classe de test et mise en pratique des accès db.
@@ -34,29 +37,51 @@ public class PostgreSQLJDBC {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-	      
-	      ColumnDB column1 = new ColumnDB(COLUMN1,"int");
-	      column1.addCondition("PRIMARY KEY", "NOT NULL");	  
-	      ColumnDB column2 = new ColumnDB(COLUMN2,"numeric");
-	      column2.addCondition("NOT NULL");
-	      ColumnDB column3 = new ColumnDB(COLUMN3,"char(8)");
-	      ColumnDB column4 = new ColumnDB(COLUMN4,"varChar");
-	      ColumnDB column5 = new ColumnDB(COLUMN5,"boolean");
+//		testPersonDao();
+		testTitleDao();
+	}
 
-	      HashMap<String, String> row1 = new HashMap<String, String>();
-	      row1.put(COLUMN1, "'1'");
-	      row1.put(COLUMN2, "'1239'");
-	      row1.put(COLUMN3, "'abcde'");
-	      row1.put(COLUMN4, "'Une String'");
-	      row1.put(COLUMN5, "false");
-	      HashMap<String, String> row2 = new HashMap<String, String>();
-	      row2.put(COLUMN1, "'2'");
-	      row2.put(COLUMN2, "'0'");
-	      row2.put(COLUMN3, "'fghij'");
-	      row2.put(COLUMN4, "'Une longue string'");
-	      row2.put(COLUMN5, "true");
-
-	      Person sk = new Person();
+	private static void testTitleDao(){
+		Title rando = new Title();
+		rando.setOriginal("Les randonneurs");
+		
+		Title mc = new Title();
+		mc.setOriginal("Mountain Crush");
+		
+		Title dik = new Title();
+		dik.setOriginal("Dikkenek");
+		
+		Title ap = new Title();
+		ap.setOriginal("Le fabuleux destin d'Amélie Poulain");
+		ap.setEnglishVersion("Amélie");
+		
+		Title witch = new Title();
+		witch.setOriginal("Las brujas de Zugarramurdi");
+		witch.setFrenchVersion("Les sorcières de Zugarramurdi");
+		witch.setEnglishVersion("Witching & Bitching");
+		try{
+			PostgreHelper psqlHelper = new PostgreHelper();
+			
+			TitleDAO dao = new TitleDAO(psqlHelper);
+			dao.create();
+			dao.save(rando);
+			dao.save(mc);
+			dao.save(dik);
+			dao.save(ap);
+			dao.save(witch);
+			
+			
+			pause();
+			
+			dao.destroy();
+			psqlHelper.destroy();
+		}catch(Exception e){
+		    e.printStackTrace();
+		}
+	}
+	
+	private static void testPersonDao(){
+		 Person sk = new Person();
 	      sk.setName("Kubrick");
 	      sk.setFirstName("Stanliii");
 	      Calendar calendar= new GregorianCalendar(1928,Calendar.JULY,26);
@@ -84,6 +109,13 @@ public class PostgreSQLJDBC {
 	      bp.setDateOfBirth(calendar.getTime());
 	      bp.setOrigin(Country.BE);
 	      
+	      Person laurence = new Person();
+	      laurence.setName("d'Arabie");
+	      laurence.setFirstName("Laurence");
+	      calendar.set(1970, Calendar.JANUARY,1);
+	      laurence.setDateOfBirth(calendar.getTime());
+	      laurence.setOrigin(Country.UK);
+	      
 	      try {
 	         PostgreHelper psqlHelper = new PostgreHelper();
 	         
@@ -93,50 +125,24 @@ public class PostgreSQLJDBC {
 	         dao.save(bp);
 	         dao.save(rs);
 	         dao.save(kl);
+	         dao.save(laurence);
 	         
 	         for(Person p : dao.getAllPersons()){
 	        	 System.out.println(p);
 	         }
 	         
 	         sk.setFirstName("Stanley");
+	         bp.setFirstName("Benoît l'olibrius");
 	         dao.save(sk);
-	         dao.delete(kl);
+	         dao.save(bp);
 	         
 	         System.out.println("---------------------------");
 	         for(Person p : dao.getAllPersons()){
 	        	 System.out.println(p);
 	         }
-	         System.out.println("Press enter to end the program and drop the created table.");	         
-	         System.in.read();
+	         pause();
 	         dao.destroy();
-	       /*  
-	         psqlHelper.createTable(TABLE_NAME,column1, column2, column3,column4, column5);
-
-	         psqlHelper.insertRow(TABLE_NAME, row1);
-	         psqlHelper.insertRow(TABLE_NAME, row2);
-	         
-	         ResultSet rs = psqlHelper.selectRow(TABLE_NAME, COLUMN1 +" =1");
-	         displayQueryResult(rs);
-	         rs.close();
-
-		      HashMap<String, String> newValues = new HashMap<String, String>();
-//		      newValues.put(COLUMN1, "2");
-		      newValues.put(COLUMN2, "0");
-		      newValues.put(COLUMN3, "'fghij'");
-//		      newValues.put(COLUMN4, "'Une longue string'");
-//		      newValues.put(COLUMN5, "true");
-	         
-		      psqlHelper.updateRow(TABLE_NAME, newValues, COLUMN1+"=1");
-		      psqlHelper.deleteRow(TABLE_NAME, COLUMN2 + "=0");
-
-	         rs = psqlHelper.selectRow(TABLE_NAME, null);
-	         displayQueryResult(rs);
-	         rs.close();
-	         
-	         System.out.println("Press enter to end the program and drop the created table.");	         
-	         System.in.read();
-	         psqlHelper.dropTable(TABLE_NAME);
-	         */
+	    
 	         psqlHelper.destroy();
 	      } catch (Exception e) {
 	         e.printStackTrace();
@@ -145,6 +151,66 @@ public class PostgreSQLJDBC {
 	      }
 	}
 
+	private static void primaryTest(){
+      ColumnDB column1 = new ColumnDB(COLUMN1,"int");
+      column1.addCondition("PRIMARY KEY", "NOT NULL");	  
+      ColumnDB column2 = new ColumnDB(COLUMN2,"numeric");
+      column2.addCondition("NOT NULL");
+      ColumnDB column3 = new ColumnDB(COLUMN3,"char(8)");
+      ColumnDB column4 = new ColumnDB(COLUMN4,"varChar");
+      ColumnDB column5 = new ColumnDB(COLUMN5,"boolean");
+
+      HashMap<String, String> row1 = new HashMap<String, String>();
+      row1.put(COLUMN1, "'1'");
+      row1.put(COLUMN2, "'1239'");
+      row1.put(COLUMN3, "'abcde'");
+      row1.put(COLUMN4, "'Une String'");
+      row1.put(COLUMN5, "false");
+      HashMap<String, String> row2 = new HashMap<String, String>();
+      row2.put(COLUMN1, "'2'");
+      row2.put(COLUMN2, "'0'");
+      row2.put(COLUMN3, "'fghij'");
+      row2.put(COLUMN4, "'Une longue string'");
+      row2.put(COLUMN5, "true");
+      try{
+		PostgreHelper psqlHelper = new PostgreHelper();
+        
+        psqlHelper.createTable(TABLE_NAME,column1, column2, column3,column4, column5);
+        psqlHelper.insertRow(TABLE_NAME, row1);
+        psqlHelper.insertRow(TABLE_NAME, row2);
+        
+        Condition fromCol1 = new Condition();
+        fromCol1.setKey(COLUMN1);
+        fromCol1.setValue(String.valueOf(1));
+        fromCol1.setType(Type.EQUAL);
+        fromCol1.setCombination(Combination.AND);
+        
+        ResultSet rs = psqlHelper.selectRow(TABLE_NAME, fromCol1);
+        displayQueryResult(rs);
+        rs.close();
+
+	      HashMap<String, String> newValues = new HashMap<String, String>();
+//	      newValues.put(COLUMN1, "2");
+	      newValues.put(COLUMN2, "0");
+	      newValues.put(COLUMN3, "'fghij'");
+//	      newValues.put(COLUMN4, "'Une longue string'");
+//	      newValues.put(COLUMN5, "true");
+        
+	      psqlHelper.updateRow(TABLE_NAME, newValues, fromCol1);
+	      psqlHelper.deleteRow(TABLE_NAME, COLUMN2 + "=0");
+
+	      rs = psqlHelper.selectRow(TABLE_NAME, null);
+	      displayQueryResult(rs);
+	      rs.close();
+        
+	      pause();
+	      psqlHelper.dropTable(TABLE_NAME);
+
+	      psqlHelper.destroy();
+		}catch(Exception e){
+			
+		}
+	}
 	private static void displayQueryResult(ResultSet rs) throws SQLException {
 		while (rs.next()) {
 		     int name1Val = rs.getInt(COLUMN1);
@@ -160,5 +226,9 @@ public class PostgreSQLJDBC {
 		     System.out.println();
 		}
 	}
-
+	
+	private static void pause() throws IOException {
+		System.out.println("Press enter to end the program and drop the created table.");	         
+		System.in.read();
+	}
 }

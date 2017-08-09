@@ -11,11 +11,25 @@ package be.mlefevre.MovieStore.model;
  */
 public class Title {
 	
+	private String id;
 	private String original;
 	private String frenchVersion;
 	private String englishVersion;
 	
+	private static int index = 0;
 	
+	public Title(){
+		
+		//TODO : solution temporaire : la db doit prendre cet index en charge.
+		this.id = String.valueOf(index++);
+	}
+	
+	public String getId() {
+		return id;
+	}
+	public void setId(String id) {
+		this.id = id;
+	}
 	public String getOriginal() {
 		return original;
 	}
@@ -34,6 +48,7 @@ public class Title {
 	public void setEnglishVersion(String englishVersion) {
 		this.englishVersion = englishVersion;
 	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -5,10 +5,13 @@ package be.mlefevre.MovieStore.dao;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * This class provide method to access and manipulate data in 
@@ -99,45 +102,111 @@ public class PostgreHelper implements SQLHelper {
 	public void insertRow(String tableName, HashMap<String, String> values) throws SQLException{
 		StringBuilder columnBuilder = new StringBuilder();
 		StringBuilder valueBuilder = new StringBuilder();
+		List<String> keySet = new ArrayList<String>();
+		keySet.addAll(values.keySet());
 		columnBuilder.append("(");
 		valueBuilder.append("(");
-		int index = 1;
-		for(String key : values.keySet()){
-			String hasComma = (index<values.size())?",":"";
-			columnBuilder.append(key).append(hasComma);
-			valueBuilder.append(values.get(key)).append(hasComma);
-			index++;
+		for(int i=0 ; i<keySet.size(); i++){
+			String hasComma = (i+1<keySet.size())?",":"";
+			columnBuilder.append(keySet.get(i)).append(hasComma);
+			valueBuilder.append("?").append(hasComma);
 		}
+		
+//		int index = 1;
+//		for(String key : keySet){
+//			String hasComma = (index<values.size())?",":"";
+//			columnBuilder.append(key).append(hasComma);
+//			valueBuilder.append(values.get(key)).append(hasComma);
+//			index++;
+//		}
 		columnBuilder.append(")");
 		valueBuilder.append(")");
 		String sql = "INSERT INTO " +tableName+" "+ columnBuilder.toString()+" "
 	            + "VALUES "+valueBuilder.toString()+";";
 
-		statement.executeUpdate(sql);
+		PreparedStatement prepSt = connection.prepareStatement(sql);
+		for(int i=0 ; i<keySet.size(); i++){
+			prepSt.setString(i+1, values.get(keySet.get(i)));
+		}
+		prepSt.executeUpdate();
+//		statement.executeUpdate(sql);
 	}
 	
-	public ResultSet selectRow(String tableName, String condition)throws SQLException{
+	public void updateRow(String tableName, HashMap<String, String> newValues, Condition... conditions)throws SQLException{
+		List<String> keySet = new ArrayList<String>();
+		keySet.addAll(newValues.keySet());
+		
+		StringBuilder sql = new StringBuilder();
+		sql.append("UPDATE ").append(tableName).append(" SET ");
+		for(int i=0 ; i<keySet.size(); i++){
+			String hasComma = (i+1<keySet.size())?",":"";
+			sql.append(keySet.get(i)).append(" = ").append("?").append(hasComma);
+		}
+		
+//		int index = 1;
+//		for(String key : newValues.keySet()){
+//			String hasComma = (index<newValues.size())?",":"";
+//			sql.append(key).append(" = ").append(newValues.get(key)).append(hasComma);
+//			index++;
+//		}
+
+		if(conditions != null && conditions.length > 0){
+			sql.append(" WHERE ");
+			for(int i = 0; i<conditions.length; i++){
+				if(i>0){
+					sql.append(conditions[i].getCombination().getLabel());
+				}
+				sql.append(conditions[i].getKey())
+					.append(conditions[i].getType().getSeparator())
+					.append(conditions[i].getType().getStart())
+					.append("?")
+					.append(conditions[i].getType().getEnd());
+			}
+		}
+			
+//		sql.append(" WHERE ").append(conditions);
+		
+		PreparedStatement prepSt = connection.prepareStatement(sql.toString());
+		for(int i=0 ; i<keySet.size(); i++){
+			prepSt.setString(i+1, newValues.get(keySet.get(i)));
+		}
+		if(conditions != null){
+			for(int i = 0; i<conditions.length; i++){
+				prepSt.setString(i+keySet.size()+1, conditions[i].getValue());
+			}
+		}
+		prepSt.executeUpdate();
+//		statement.executeUpdate(sql.toString());
+	}
+	
+	public ResultSet selectRow(String tableName, Condition... conditions)throws SQLException{
 		StringBuilder sql = new StringBuilder();
 		sql.append("SELECT * FROM ").append(tableName);
-		if(condition != null && ! condition.trim().equals("")){
-			sql.append(" WHERE ").append(condition);
+		
+		if(conditions != null && conditions.length > 0){
+			sql.append(" WHERE ");
+			for(int i = 0; i<conditions.length; i++){
+				if(i>0){
+					sql.append(conditions[i].getCombination().getLabel());
+				}
+				sql.append(conditions[i].getKey())
+					.append(conditions[i].getType().getSeparator())
+					.append(conditions[i].getType().getStart())
+					.append("?")
+					.append(conditions[i].getType().getEnd());
+			}
 		}
 		sql.append(";");
-        return statement.executeQuery( sql.toString());
-	}
-	
-	public void updateRow(String tableName, HashMap<String, String> newValues, String conditions)throws SQLException{
-		StringBuilder sql = new StringBuilder();
-		sql.append("UPDATE ").append(tableName).append(" set ");
-		int index = 1;
-		for(String key : newValues.keySet()){
-			String hasComma = (index<newValues.size())?",":"";
-			sql.append(key).append(" = ").append(newValues.get(key)).append(hasComma);
-			index++;
-		}
-		sql.append(" where ").append(conditions);
 		
-        statement.executeUpdate(sql.toString());
+		PreparedStatement prepSt = connection.prepareStatement(sql.toString()); 
+		if(conditions != null){
+			for(int i = 0; i<conditions.length; i++){
+				prepSt.setString(i+1, conditions[i].getValue());
+			}
+		}
+		
+//        return statement.executeQuery( sql.toString());
+		return prepSt.executeQuery();
 	}
 	
 	public void deleteRow(String tableName, String conditions)throws SQLException{

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package be.mlefevre.MovieStore.dao;
+package be.mlefevre.MovieStore.dao.impl;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -10,6 +10,11 @@ import java.util.List;
 
 import javax.xml.transform.TransformerConfigurationException;
 
+import be.mlefevre.MovieStore.dao.Condition;
+import be.mlefevre.MovieStore.dao.Dao;
+import be.mlefevre.MovieStore.dao.SQLHelper;
+import be.mlefevre.MovieStore.dao.Condition.Combination;
+import be.mlefevre.MovieStore.dao.Condition.Type;
 import be.mlefevre.MovieStore.dao.transformer.Transformer;
 import be.mlefevre.MovieStore.dao.transformer.impl.PersonTransformer;
 import be.mlefevre.MovieStore.exceptions.DaoException;
@@ -22,19 +27,24 @@ import be.mlefevre.MovieStore.model.Person;
  */
 public class PersonDAO extends Dao<Person> {
 
-	private Transformer<Person> personTransformer;
+	private Transformer<Person> transformer;
 	
 	public PersonDAO(SQLHelper helper) throws DaoException{
 		super(helper);
-		personTransformer = new PersonTransformer();
+		transformer = new PersonTransformer();
 	}
 	
 	public List<Person> getPersonFromName(String name) throws DaoException{
 		List<Person> result = new ArrayList<Person>();
 		try{
-			ResultSet resultSet = helper.selectRow(PersonTransformer.PERSON_TABLE_NAME, PersonTransformer.NAME_COL_NAME+"='"+name+"'");
+			Condition fromName = new Condition();
+			fromName.setKey(PersonTransformer.NAME_COL_NAME);
+			fromName.setValue(name);
+			fromName.setType(Type.EQUAL);
+			fromName.setCombination(Combination.AND);
+			ResultSet resultSet = helper.selectRow(PersonTransformer.PERSON_TABLE_NAME, fromName);
 			while(resultSet.next()){
-				Person person = personTransformer.getObject(resultSet);
+				Person person = transformer.getObject(resultSet);
 				result.add(person);
 			}
 			resultSet.close();
@@ -50,7 +60,7 @@ public class PersonDAO extends Dao<Person> {
 			ResultSet rs = helper.selectRow(PersonTransformer.PERSON_TABLE_NAME, null);
 
 			while(rs.next()){
-				Person person = personTransformer.getObject(rs);
+				Person person = transformer.getObject(rs);
 				result.add(person);
 			}
 			rs.close();
@@ -64,9 +74,15 @@ public class PersonDAO extends Dao<Person> {
 	public void save(Person person)throws DaoException{
 		try{
 			if(getPersonFromName(person.getName()).isEmpty()){
-				helper.insertRow(PersonTransformer.PERSON_TABLE_NAME, personTransformer.getValuesMap(person));
+				helper.insertRow(PersonTransformer.PERSON_TABLE_NAME, transformer.getValuesMap(person));
 			}else{
-				helper.updateRow(PersonTransformer.PERSON_TABLE_NAME, personTransformer.getValuesMap(person), PersonTransformer.NAME_COL_NAME+"='"+person.getName()+"'");
+				Condition fromName = new Condition();
+				fromName.setKey(PersonTransformer.NAME_COL_NAME);
+				fromName.setValue(person.getName());
+				fromName.setType(Type.EQUAL);
+				fromName.setCombination(Combination.AND);
+				
+				helper.updateRow(PersonTransformer.PERSON_TABLE_NAME, transformer.getValuesMap(person), fromName);
 			}
 		}catch(SQLException e){
 			throw new DaoException("Error when saving person " + person + " : " + e);
@@ -85,7 +101,7 @@ public class PersonDAO extends Dao<Person> {
 	@Override
 	public void create() throws DaoException {
 		try{
-			personTransformer.createTable(helper);
+			transformer.createTable(helper);
 		}catch (SQLException e){
 			throw new DaoException("Error when creating table " + e);
 		}

@@ -3,8 +3,6 @@
  */
 package be.mlefevre.MovieStore.dao;
 
-import java.sql.SQLException;
-
 import be.mlefevre.MovieStore.exceptions.DaoException;
 
 /**
