@@ -44,6 +44,22 @@ public class PersonDAO extends Dao<Person> {
 		return result;
 	}
 	
+	public List<Person> getAllPersons() throws DaoException{
+		List<Person> result = new ArrayList<Person>();
+		try{
+			ResultSet rs = helper.selectRow(PersonTransformer.PERSON_TABLE_NAME, null);
+
+			while(rs.next()){
+				Person person = personTransformer.getObject(rs);
+				result.add(person);
+			}
+			rs.close();
+		}catch(SQLException e){
+			throw new DaoException("Error when getting persons : "+ e);
+		}
+		return result;
+	}
+	
 	@Override
 	public void save(Person person)throws DaoException{
 		try{
@@ -58,6 +74,15 @@ public class PersonDAO extends Dao<Person> {
 	}
 
 	@Override
+	public void delete(Person person) throws DaoException{
+		try{
+			helper.deleteRow(PersonTransformer.PERSON_TABLE_NAME, PersonTransformer.NAME_COL_NAME + " = '" + person.getName() + "';");
+		}catch(SQLException e){
+			throw new DaoException("Error when deleting person " + person + " : " + e);
+		}
+	}
+	
+	@Override
 	public void create() throws DaoException {
 		try{
 			personTransformer.createTable(helper);
@@ -69,7 +94,7 @@ public class PersonDAO extends Dao<Person> {
 	@Override
 	public void destroy() throws DaoException{
 		try{
-		helper.dropTable(PersonTransformer.PERSON_TABLE_NAME);
+			helper.dropTable(PersonTransformer.PERSON_TABLE_NAME);
 		}catch(SQLException e){
 			throw new DaoException("Error when dropping the table "+e);
 		}

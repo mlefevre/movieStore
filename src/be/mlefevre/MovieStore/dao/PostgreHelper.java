@@ -85,9 +85,15 @@ public class PostgreHelper implements SQLHelper {
 	}
 	
 	public void dropTable(String tableName) throws SQLException{
-		String sql = "DROP TABLE " +tableName;
-		statement.executeUpdate(sql);
-		System.out.println("Table "+tableName+" dropped.");
+		if(isTableExist(tableName)){
+			String sql = "DROP TABLE " +tableName;
+			statement.executeUpdate(sql);
+			System.out.println("Table "+tableName+" dropped.");
+		}else{
+			// Do nothing.
+			System.out.println("Table "+tableName+" doesn't exist.");
+		}
+		
 	}
 	
 	public void insertRow(String tableName, HashMap<String, String> values) throws SQLException{

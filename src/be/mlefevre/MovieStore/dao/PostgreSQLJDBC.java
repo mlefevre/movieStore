@@ -62,7 +62,7 @@ public class PostgreSQLJDBC {
 	      Calendar calendar= new GregorianCalendar(1928,Calendar.JULY,26);
 	      sk.setDateOfBirth(calendar.getTime());
 	      sk.setOrigin(Country.USA);
-	      
+
 	      Person kl = new Person();
 	      kl.setName("Loach");
 	      kl.setFirstName("Ken");
@@ -70,22 +70,40 @@ public class PostgreSQLJDBC {
 	      kl.setDateOfBirth(calendar.getTime());
 	      kl.setOrigin(Country.UK);
 	      
+	      Person rs = new Person();
+	      rs.setName("Scott");
+	      rs.setFirstName("Ridley");
+	      calendar.set(1937, Calendar.NOVEMBER, 30);
+	      rs.setDateOfBirth(calendar.getTime());
+	      rs.setOrigin(Country.UK);
+
+	      Person bp = new Person();
+	      bp.setName("Poelvoorde");
+	      bp.setFirstName("Benoit");
+	      calendar.set(1964, Calendar.SEPTEMBER, 22);
+	      bp.setDateOfBirth(calendar.getTime());
+	      bp.setOrigin(Country.BE);
+	      
 	      try {
 	         PostgreHelper psqlHelper = new PostgreHelper();
 	         
 	         PersonDAO dao = new PersonDAO(psqlHelper);
 	         dao.create();
 	         dao.save(sk);
+	         dao.save(bp);
+	         dao.save(rs);
+	         dao.save(kl);
 	         
-	         for(Person p : dao.getPersonFromName("Kubrick")){
+	         for(Person p : dao.getAllPersons()){
 	        	 System.out.println(p);
 	         }
 	         
 	         sk.setFirstName("Stanley");
 	         dao.save(sk);
-	         dao.save(kl);
+	         dao.delete(kl);
 	         
-	         for(Person p : dao.getPersonFromName("Loach")){
+	         System.out.println("---------------------------");
+	         for(Person p : dao.getAllPersons()){
 	        	 System.out.println(p);
 	         }
 	         System.out.println("Press enter to end the program and drop the created table.");	         

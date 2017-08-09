@@ -31,6 +31,7 @@ public class PersonTransformer implements Transformer<Person> {
 	public static final String FIRSTNAME_COL_NAME = "firstName";
 	public static final String DOB_COL_NAME = "dateOfBirth";
 	public static final String ORIGIN_COL_NAME = "origin";
+//	public static final String ALT_NAMES_COL_NAME = "alternativeNames"; //TODO
 
 	/* (non-Javadoc)
 	 * @see be.mlefevre.MovieStore.dao.transformer.Transformer#getValuesMap(java.lang.Object)
